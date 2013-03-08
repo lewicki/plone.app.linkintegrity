@@ -30,7 +30,12 @@ class UpdateView(BrowserView):
     def update(self):
         catalog = getToolByName(self.context, 'portal_catalog')
         count = 0
-        for brain in catalog(Language='all'):
+        brains = catalog(Language='all')
+        ## In some environments 'Language' index may be patched.
+        ## Let's try to find items without it as well.
+        if not brains:
+            brains = catalog()
+        for brain in brains:
             obj = brain.getObject()
             if IBaseObject.providedBy(obj):
                 modifiedArchetype(obj, 'dummy event parameter')
