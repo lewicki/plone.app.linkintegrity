@@ -135,12 +135,17 @@ def modifiedArchetype(obj, event):
         if isinstance(field, TextField):
             accessor = field.getAccessor(obj)
             encoding = field.getRaw(obj, raw=1).original_encoding
-            if accessor is not None:
-                value = accessor()
-            else:
-                # Fields that have been added via schema extension do
-                # not have an accessor method.
-                value = field.get(obj)
+            # If field is rendered using Apache mapping to Plone subfolder, relative links are broken
+            # resolveuid links should be kept untouched
+            try:
+                value = field.getRaw(obj)
+            except:
+                if accessor is not None:
+                    value = accessor()
+                else:
+                    # Fields that have been added via schema extension do
+                    # not have an accessor method.
+                    value = field.get(obj)
             links = extractLinks(value, encoding)
             refs |= getObjectsFromLinks(obj, links)
     updateReferences(obj, referencedRelationship, refs)
